@@ -1,2 +1,1 @@
-# WangVS
-Wang VS emulator 
+#Wang VS Emulator

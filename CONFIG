@@ -1,0 +1,9 @@
+;
+; Configure one workstation and four disk units.
+; Currently, the contents of the config file are ignored.
+;
+ws   0000 = 000 2246C
+disk 2000 = 128 2268V6
+disk 2001 = 129 2268V6
+disk 2002 = 130 2268V6
+disk 2003 = 131 2268V6

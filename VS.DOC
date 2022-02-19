@@ -1,0 +1,779 @@
+Welcome to The Wang VS emulator.
+
+This program emulates some of the features of the Wang VS computer system.
+The Wang VS system is a very efficient data processing computer system.
+Most applications do not require graphics or sound capabilities.  Although
+there are specialized workstations available for these applications, they
+are not found in most Wang VS installations.  The current version of the
+emulator is designed to emulate the less sophisticated features of the
+Wang VS computer system.  These features can be emulated relatively easy,
+since the design of the Wang VS system is such that no program needs to
+access hardware directly.  Application programs only need to call on the
+Operating System to have functions performed.  These application programs
+can be executed on the emulator if the emulator supplies these Operating
+System functions.  There is no need to actually emulate all of the
+hardware, as long as the most essential functions can be performed.
+
+Components to be emulated.
+
+The Wang VS system consists of hardware and the Operating System.  The
+Operating System is especially designed for the Wang VS system, and
+therefore some of the functions are designed to control a specific piece of
+hardware.  On the other hand, some pieces of hardware are designed to
+control a specific piece of software.  If we make a list of all of the key
+components, we can determine what needs to be emulated, and then we can
+determine the best way to emulate it.  The hardware consists of the
+processor, with its Input/Output Processors, and various types of
+peripherals.  The processor has a certain amount of main memory.  This is
+referred to as physical memory.  Peripherals include terminals, printers,
+storage devices and communications devices.  The Operating System consists
+of all software components that manage everything that the system does.
+This includes managing access to the hardware, and access to the data
+stored on the storage devices.  The Operating System also includes
+debugging facilities and facilities for transferring data between the
+various parts of the hardware.  The hardware supports this by providing
+functions within the processor itself, or functions within the Input/Output
+Processors installed in the system.  Another task of the Operating System
+is organizing the use of the system by the various tasks that are run on
+the system, and communication between these tasks.  All this is a lot of
+functionality.  Emulating all this is not a simple task.  My time is
+limited, and I am working on this emulator all by myself.  It is obvious
+that for a single person, it is hard to write an emulator that does all
+this, while it took a number of engineers years to build the hardware and
+the Operating System.  However, if we restrict the functionality of the
+emulator a little, we can emulate most of the essential components.  Not
+all peripherals need to be supported.  Lots of things are complicated when
+there are several tasks running in the system at the same time.  If we
+restrict the emulator to only one user task, everything that is related to
+tasks can be simplified.  Each task in the system has a given amount of
+virtual address space assigned to it.  The Operating System manages use of
+the physical memory by paging the required portions of virtual memory into
+physical memory, and some address translation is performed by the hardware
+and the software.  Instructions are executed in this virtual address space.
+Emulating this is somewhat complicated.  Since there is no need for
+programs to actually access physical memory directly, only the virtual
+memory needs to be emulated.  Thus there is no need for address
+translation.  The Input/Output Processors and intelligent peripherals
+together relieve the system from various tasks, thus freeing the processor
+for use by other tasks.  Since there is only one user task, there is no
+need to actually emulate these devices, since there are no other tasks that
+need attention.  Only the functions these devices perform must be emulated.
+
+Components that are emulated.
+
+The current version of the emulator is discussed in this section.  If a
+certain feature is not currently implemented, that may be caused by the
+fact that there is no proper hardware support for the feature.  Another
+reason could be simply lack of time, since there is only me working on this
+project.
+
+Almost all of the instructions of the VS instruction set are implemented.
+Extended addressing is not supported.  Some specialized diagnostics
+instructions are not supported.  The instructions that access portions of
+the hardware directly are not supported, or are implemented to perform no
+operation.  Most of these instructions are privileged, and no user
+application contains these instructions.  Some of the control registers are
+used for debugging and timing purposes.  Most of these functions are not
+supported.  There is currently no support for interrupts.  Some of the
+interrupt types are emulated though, although the emulation of these
+interrupts might not be based on the condition that is supposed to cause
+the interrupt.  Most of the access violations are not recognized, since
+there is no hardware support for it.
+
+There is limited support for peripherals.  None of the storage devices are
+currently emulated.  However, disk volumes can be emulated.  There are
+several options for emulating disk volumes.  Most of these options use the
+native file system on the host system.  Tape devices, communications
+devices and printers are currently not emulated.  Workstations can be
+emulated, however the current implementation only supports a single
+mws-type workstation.  It is not possible to load microcode or personality
+control information into the workstation.  The workstation does emulate
+some of the features supported by mws workstations.
+
+The emulator currently only supports a single task.  Task switches do not
+occur, and there is no scheduler.  Once the system is IPL'ed, the user can
+either logon to the system, or enter the operator's console.  After logging
+on, the command processor is entered.  The user can then run programs,
+perform commands, and do the things users usually do.  Not all of the
+commands of the operator's console and the command processor are
+implemented.  The ones that are implemented might not be fully implemented.
+Some of these functions are of little or no importance for single user
+systems.  Some functions are not essential for running normal applications.
+Most users will simply run applications.  These applications will call the
+Operating System to perform various functions.  In general, there are three
+types of services provided by the Operating System.  The Operating System
+services consists of the SVC services and the JSCI system services.  The
+third type of service is the file system.  The file system performs
+functions such as reading and writing to files.  Some portions of the
+Operating System services are required to manage files.  Most of the JSCI
+system services are currently not implemented.  The SVC services that are
+used most frequently have been implemented.  Some services that have been
+implemented are not fully implemented.  The file system is only partially
+implemented.
+
+Accessing files.
+
+Many parts of the DMS filesystem are unsufficiently documented.  This makes
+it hard to emulate.  Some of the knowledge about the filesystem is based on
+experimentation.  Some of the features may be incomplete, or inaccurate, or
+both.  Several of the features of the filesystem are implemented within the
+Operating System itself.  In particular, everything that is related to the
+management of files, filenames, and space allocation, is handled by the
+SuperVisor Call services.  This means that there is a very tight interface
+between the filesystem and the Operating System.  There are various ways
+one could emulate storage devices.  Currently the emulator only supports
+disk volumes.  There are several ways of exchanging data between a Wang VS
+system and PC-systems.  Some of these ways can be used to transfer files
+for use with the emulator.  The emulator's system services that manage
+storage devices support these types of files, in varying levels.
+
+In order to improve integration with the data from the native file system
+on the host system, it is also possible to access files that reside on the
+native file system as part of some sort of volume.  This eliminates the
+need for special tools and utilities to exchange data between an emulated
+VS volume and the native file system, since regular utilities for copying
+data from one volume to another can be used for this purpose.  The design of
+volume emulation includes several ways of emulating disk volumes.  Currently,
+most of the emulation methods are not implemented, or not fully implemented.
+The VS needs an IPL-volume to load the Operating System from.  Some VS
+models also need a disk volume or console device to load boot-files from.
+Since the entire Operating System is being emulated, there is no need for
+boot files or Operating System files to be loaded at IPL-time.  However,
+the system will need to know what the IPL-volume is, since it is used in
+various places as the default volume.  In future versions, the emulator
+might be able to read a VS config-file, and use that to generate the
+system.  At that time, the IPL-monitor will need to be able to handle
+volumes, or it will need to rely on a filesystem that knows how to obtain
+the config-file from some sort of volume.  The type of emulation for a
+volume is currently derived from the information that is recorded in the
+initialization file for the emulator.  All files on a given volume will use
+the same emulation method.  The volume type must be specified along with
+the other information about the volume.  The following list of volume types
+is currently available for use in the disk specification line of the
+initialization file :
+
+NONE     File images with no header.  Not a special volume device.
+REAL     The real thing.
+IMAGE    Disk image file.
+STREAM   File images.
+RECORD   Record oriented.
+WSN      File on a WSN node.
+RSF      File in a RSF cluster.
+VSDMS    File images with a VSDMS header as used by VSPC928 and SBA TCP/IP.
+LSBACKUP File images with a Lightspeed backup format header.
+
+Volume type NONE is currently used for most purposes.  Libraries are
+emulated by using sub-directories.  The path specified should point to a
+directory containing a sub-directory for each library on the volume.  Files
+should reside in these sub-directories.  They should not have an extension,
+unless otherwise noted.  Since there is no VTOC for this type of volume,
+the file labels are stored in 80-byte files that have an extension of .fdr,
+any other information in the VTOC is fake, incorrect, unreliable, or all of
+the above.  Some directory management has been implemented, but not all of
+it, since there has been very limited time spent on issues related to
+this.
+Volume type REAL is designed to allow the direct use of actual VS volumes
+on the emulator.  This would be limited to removable volumes, unless some
+sort of fixed disk can be physically attached to the host machine.  This
+could include SCSI-disks, or various types of removable media based on
+industry standards.  This obviously includes the various formats of
+diskettes supported by the VS.  There is currently no coding to read from
+or write to VS formatted disks and diskettes, although this seems to be not
+too complicated.  Since this will probably have to be implemented at a
+fairly low level, it is doomed to be non-portable.  This is why no research
+has been done on this subject yet.  Most of the logic for determining what
+disk block to read or write should be portable though, so only the actual
+reading and writing of sectors on the host system would have to be done by
+system-specific code.  To reverse things a little, it would be very nice if
+the VS would support some sort of industry standard removable mass storage
+device, like ZIP-drives, JAZ-drives, DVD or whatever.  This way, physical
+exchange of data would be a breeze.  Let us hope for nice features and
+added device support in release 8.0 or so.
+Volume type IMAGE is a simple file that is very similar to the VOLCOPY
+option of BACKUP.  The entire volume is stored in a large file on the
+native filesystem.  Every single block on the volume is stored in this
+file, so the VTOC is included.  The path should point to this file.  This
+volume type has not yet been implemented.
+Volume type STREAM has not yet been implemented.  At the moment, I do not
+even know what type of emulation it represents.  It might be used for files
+that are copied in block-mode, as used by the WSN file transfer service on
+PC systems.
+Volume type RECORD is used for files that are stored on the native file
+system in a record oriented format.  This would include text files, which
+have a standard end of line character.  This type of files can be useful
+when working with source files.  The record length for this type of files
+is currently forced to be 80.  Everything else about this volume type is
+similar to the volume type NONE.
+Volume type WSN is supposed to be able to connect to a VS system on a WSN
+network and then access the files on that system.  The actual way of
+implementing this is undefined as of yet.
+Volume type RSF is supposed to be able to access files in a RSF cluster.
+The actual way of implementing this is undefined as of yet.
+Volume type VSDMS is used for files that are copied to the PC with the
+VSPC928 utility as a VSDMS file.  This copies all the blocks in some sort
+of block-mode.  The FDR information is stored in a 1024 byte header that is
+pre-pended to the file.  This format is also used by the TCP/IP file transfer
+tools from SBA, currently owned by Sentinel Technologies.  Everything else
+about this volume type is similar to the volume type NONE.
+Volume type LSBACKUP is used for files that are copied to the PC with the
+Lightspeed file exchange software, using the Lightspeed backup format.
+This copies all the blocks in some sort of block-mode.  The FDR and ACL
+information is stored in a variable length header that is pre-pended to the
+file, so the .fdr files are not needed.  The files should have the
+extension .bak.  Everything else about this file format is similar to the
+volume type NONE.
+
+Editing the FDR.
+
+Some volume emulation types store the FDR1 block in a header in the file.
+Not all types support this, so for those types, the FDR1 information is stored
+in a separate file.  The information in this file is used whenever the FDR1
+block is needed.  If this file does not exist, a getparm is displayed to allow
+the user to enter the information.  An option to save this information for
+future use is also offered, so this information only has to be entered once.
+If the information in the FDR1 block is incorrect, the information in the FDR1
+can be edited by pressing the PF6 key on the filenames screen of the command
+processor.  The getparm for editing the FDR1 block is then displayed.  This
+getparm can be switched between field mode and hexa-decimal mode.  The FDR1
+block of a file can be viewed with the MANAGER utility on the VS.  It displays
+the FDR1 block in hexa-decimal format.  This information can thus be entered
+in the emulator if the file has been transferred in a way that does not
+preserve the FDR1.  Note that indexed files need the pointer to the index root
+block, amongst other things, so entering the FDR1 in hexa-decimal format yields
+the best results.  Make sure that the FDR1 represents the information that was
+current at the time the file was transferred.  When editing the FDR1 in field
+mode, the values in the fields must be valid.  The filename in the FDR1 is used
+to create or update the FDR1 file.  Make sure that you do not modify it
+inadvertantly.  The organization (FORG) of the file must be one of the
+following: PROGRAM, PRINT, WORD PROCESSING, INDEXED, CONSEC, RELATIVE or
+UNDEFINED.  The record length must be FIXED or VARIABLE.  Compress must be
+YES or NO.  The record size may not exceed 2048.  The record count may not
+exceed 999999999.  The block count may not exceed 999999999.  Note that editing
+of the FDR1 block is not at all restricted to files that store the FDR1 in
+a separate file.  This can be done for all file types.  This allows easy
+modification of the FDR by the emulator.  After editing the FDR, the file could
+be uploaded again.  Proceed with caution if you want to do this, and make sure
+you have a proper backup.
+
+The Initial Program Load procedure.
+
+When the emulator is loaded, it wants to know about the hardware that
+appears to be installed in the VS.  The file WANGVS.INI will be read to
+determine the physical hardware that should be emulated.  This is the place
+to specify how much memory is available, and what disk devices should be
+included in the system.  Since the IPL monitor will want to mount the
+volumes that appear to be physically mounted on these disk devices, the
+volume names of the currently mounted volumes should also be specified in
+this hardware initialization file.  The type of emulation for the volume
+should also be specified.  The physical device address must be specified,
+and it must be unique.  This can then be used in the configuration file
+which is loaded during IPL.  After loading and processing the configuration
+file, volumes that were mounted, will be re-mounted on the unit with the
+same physical device address, if it still exists.  Currently, the contents
+of the configuration file are ignored.  However, the config file must
+exist, and the name of the file must be CONFIG.  At the moment, a
+predefined configuration is set up by the IPL module, as follows:
+
+PDA 2000 device 128
+PDA 2001 device 129
+PDA 2002 device 130
+PDA 2003 device 131
+PDA 2004 device 132
+PDA 2005 device 133
+PDA 2006 device 134
+PDA 2007 device 135
+PDA 2008 device 136
+PDA 2009 device 137
+
+Furthermore, it is assumed that the system operator has IPL'ed from the
+disk device at PDA 2000.  Whatever volume was specified to be mounted on
+the disk device at PDA 2000 at IPL-time, will become the system volume.
+Currently, only the predefined PDA's should be used in the WANGVS.INI file,
+since the IPL module will throw away any devices that are not in the
+CONFIG.  Devices that have not been specified in the WANGVS.INI file will
+be available for mounting a volume interactively.  The mount screen allows
+entering the path for the emulated volume.  Although a type can be entered,
+it is ignored, and all interactively mounted volumes are of type LSBACKUP.
+
+For experimental purposes, it is advised to configure a volume that
+contains some software as the system volume.  For instance, a volume SYSTEM
+that has a library @SYSTEM@.  Set the volume type according to the type of
+files that you are using, depending on how these files were transferred to
+the host system.  For editing source files, it is advised to store PC text
+files on a volume, for instance FIXED, and to define that volume as record
+oriented by giving it a volume type RECORD.  If you have files that were
+stored as a VSDMS file by the VSPC928 utility, you should also add a volume
+with volume type VSDMS.  If you have files that are transferred as a
+Lightspeed backup file, define a volume of type LSBACKUP and store the
+files in the appropriate directories.
+
+Emulating the entire filesystem is not a simple task.  Even after working
+on it for two years, most of it not yet fully complete.  Some portions are
+not implemented at all.  There are still a lot of things left to be done.
+The current filesystem can handle consecutive files.  At the moment, only
+reading and writing are supported, and a limited set of start functions.
+Files can be read in block mode, and compressed and variable length records
+are supported.  Print files are currently stored as text files for record
+oriented volumes.  Support for workstation files is fairly complete,
+although there is still a lot of work to be done on features implemented in
+the microcode.  There is support for indexed and alternate indexed files.  The
+emulator can perform sequential read operations, and random read and start
+operations.  Support for writing, rewriting and deleting records has been
+implemented, although it is still not fully tested.  Updating the primary
+and alternate key trees has been implemented but it is not guaranteed
+to function properly.  Index trees might thus get corrupted.  Indexed plus
+files are not supported.  DMS/TX files and transaction processing are not
+supported.  This implies that indexed files must be reorganized such that
+they are DMS-indexed files and that there are no recovery blocks in the file,
+prior to downloading them to the PC.  Since some information from the file
+label is required, Lightspeed backup files or VSDMS files should be used when
+using indexed files, or you should at least have the FDR1 available for the
+file in a corresponding .fdr file.
+Relative files are not supported.  The current state of the filesystem is such
+that it is possible to run an EDITOR session.  Occassionally the EDITOR will
+perform a link to the ACLDVR module which attempts to run a JSCI system
+service.  Since SSL's are currently not supported, these services cannot be
+used, and the object loader cannot resolve the references.  This will cause the
+JSCI instruction to do different things than it is supposed to.  If the
+program file ACLDVR is not available, the EDITOR will not be able to link
+to that program module.  Since the EDITOR simply ignores this, not installing
+this program file will ensure that this problem cannot occur.  There may be
+other problems that have not been discovered yet, since the code for the
+filesystem has not been tested much yet.  Be aware that everything you were
+working on might get lost.  Also make sure you have a backup of your files
+before using them.
+
+Heap management is implemented.  Programs requesting heap space will be given
+some portion of the heap.  Heap space is freed by explicit freeheap calls, and
+by scope cleanup when a link level is terminated.  All heap memory is freed
+when the user returns to the command processor.  When the heap space is
+depleted, the system must be IPL'ed, or the user must return to the command
+processor.  The way heap space is managed internally is not documented in
+user-documentation.  Some of it can be discovered by doing some research on
+a real machine.  It is unclear where the names of all pools are kept.  This
+is probably stored somewhere in segment zero, in the task related information.
+Since segment zero is not being emulated, this issue can be dealt with by
+storing this in the task related data structures which are kept inside the
+emulator.  Since the current implementation of the getheap function will
+provide memory when needed, further development of the heap management has
+been postponed to a later date.
+
+Currently, the emulator is able to load and run the EDITOR, and the
+subprograms linked-to by the EDITOR.  This includes compilers.  Getparms
+and putparms are supported, including some level of backward referencing.
+The putparm facility has not yet been tested extensively.  Since the
+filesystem is still very much in the design and construction phase, some
+debugging information can be conditionally added to the getparm that is
+issued when a file is opened.  The error reporting for opening files is
+very limited.  If there is a problem with opening a file, the getparm is
+simply re-issued with only a short explanation as to why it is re-issued.
+The automatic assignment of workfile names has not been fully implemented.
+It will be able to assign a sequence number, but currently it does not
+check whether the filename is already used in that library.  It is up to
+the user to correct the information when the open getparm is issued.  When
+a file is opened, the FDR is obtained.  Some volume emulation types store
+the FDR information in a header in the file.  If this is the case, this
+header is used.  For other emulation types, the .fdr file must be read.  If
+this does not exist, a screen for entering the FDR is displayed in a
+getparm style, so that the user can edit most of the file specifications.
+The user will need to tell the emulator what the record length is, and for
+some file types, the record count must be properly entered.  Whenever
+possible, the emulator will attempt to figure out record count and blocks
+allocated.  The FDR information can be saved to a .fdr file by requesting
+an update.  The information will then be written to a .fdr file.  The saved
+values will then be used the next time the file is opened.  If these values
+must be modified, delete the .fdr file from the native file system and
+enter the proper information the next time the file is opened, or use the edit
+FDR1 feature from the filenames command screen.
+
+There are several ways that you could use source files on the emulator.
+You can transfer them to the PC as a PC-text file.  This allows editing the
+file with a PC text editor.  These files should be placed in a
+sub-directory of a volume with emulation type RECORD.  The emulator will
+then also be able to use them in an EDITOR session, and the source file
+could be edited and compiled.  Source files can also be transferred to the
+PC in the other formats that are supported, but then these files can only
+be used within the emulator.  This might be slightly faster on the emulator
+though.  The editor work file is accessed during most of the editing
+activities, so on a portable system, this will keep the hard disk active
+all the time.  Buffer functions are not yet fully implemented, thus all
+file activity is updated on disk immediately.  It might be advisable to
+create a ramdisk workvolume to circumvent this problem.  Some Operating
+Systems provide caching of the disks, which improves performance
+considerably.  As mentioned before, heap management has not yet been fully
+implemented, so the user is likely to run out of heap space at some point
+in time.  The various filesystem calls have not been tested extensively, so
+when editing files, it is best to have a backup copy around, in order to
+prevent loss of data.  The fact that the EDITOR can be run only
+demonstrates that it is possible to use the emulator for various tasks that
+can be done equally well on a single user system.  On the other hand, the
+current implementation of the filesystem still needs a lot of work, for the
+reasons mentioned before.
+
+The current version of the emulator clearly shows that it is very much
+possible to actually emulate the VS.  Some of the functionality of the
+filesystem is limited, and large portions of the SVC-services have not yet
+been implemented, or are not yet fully implemented.  None of the JSCI-type
+system services have been implemented.  Some features have not yet been
+implemented because there is no portable way of implementing them.
+Directory services, multiple event checking and checking for Help key
+interrupts are examples of this.  Most features that have not yet been
+implemented would not be that hard to implement, if the biggest problem
+would not have been simple lack of time.  It probably took several people
+some twenty years to write the current Operating System and micro-codes.
+My time is limited to about 8 hours a week, and I have been working on this
+project for over eight years now, and I have done so alone.  This represents
+almost two man-years.  Compared to the number of man-years that must have
+gone into the development of the real VS and its Operating System, one could
+call this attempt at emulating the VS a success.  It is clear that the current
+version of the emulator is far from perfect.  However, it does demonstrate
+that with the current state of technology, the speed of an emulator is
+adequate.  Design and development of a product like this by a full time
+development team, which has access to all the required documentation, could
+result in a product that would be interesting to current VS users.  Since
+the emulator does not need the Operating System files, it could run
+applications without any of the Operating System files installed.  However,
+life without utilities like DISPLAY, the EDITOR, compilers and various other
+system utilities would not be the same.  This is one of the main reasons
+that an emulator package would need to include these tools, along with some
+sort of Operating System license.  I am not going to discuss the legal
+implications of using software on the emulator.  For information about
+this, you will have to check your license and/or consult Getronics/Wang.
+
+Initialization file options
+
+When the emulator is powered up, the hardware initialization reads the
+hardware and system settings from the wangvs.ini file.  This file is a
+simple text file, which is processed line by line.  White space is ignored,
+unless it appears inside quotes.  Comment lines may be inserted into this
+text file.  Any line that starts with a semi-colon is considered to be a
+comment line, and it is ignored.  All other lines are assumed to set some
+option or perform some function.  These lines all start with the command or
+option class.  If the option is not recognized, the line is ignored.  For
+options that are recognized, each option has additional parameters that may
+be either required or optional.  If there are multiple additional
+parameters, these may occur in any order, separated by commas.  Parameters
+are recognized by keyword.  The keyword must be spelled correctly, and an
+equals sign must follow it.  The value to be assigned to the keyword or
+parameter must be in the format specified for that keyword.  Some keywords
+expect a decimal number.  Others expect a hexa-decimal number, do not enter
+a $ sign or any other characters than hexa-decimal digits.  Yet others
+expect a character string.  If the string must contain embedded spaces, you
+must use double quotes.  Otherwise, quotes are not required.  A brief
+description of the options follows.  For each of them, the format is
+listed, and then a description of their function and parameters is given.
+The hardware initialization routine will report the selected options and
+parameters on the console.  If it detects any problems, they will be
+reported.  Otherwise, you can verify that the options and parameters have
+been properly recognized.  Comments can be added to the end of all lines by
+adding a semi-colon, and the comment portion will be ignored.
+
+CPU  cp = <number>, model = <string>
+
+This selects the CPU type being emulated.  This is used when a STCPID
+instruction is executed.  The EXTRACT SVC also returns this value.  The CP
+type code must be entered in decimal.  The model number is a text string.
+This value will be returned by the EXTRACT SVC service.
+
+CONSOLE WS0 = <string>
+
+This selects which device is used as the console.  The system should use
+this to perform IPL and control mode procedures.  The only device currently
+available is the host systems main video display, which is indicated by
+"video".  Currently this option is ignored, since only video is supported.
+
+SYSTEM systemid = <string>, model = <string>, name = <string>
+
+This selects the systemid, the model number, and the system name.  The EXTRACT
+SVC returns this systemid.  The systemid is also displayed on various operator
+console screens.  The value for model is currently ignored.  The model number
+can be set with the CPU option.  The EXTRACT SVC returns the system name.  This
+is also used for VSDMS headers.
+
+TASK uvas = <hex>, mda = <hex>
+
+This option sets various task related options, that would normally be set
+in the configuration file.  Since processing of the configuration file does
+not exist yet, this option is currently included in the initialization
+file.  The User Virtual Address Space can be set with the uvas parameter.
+The Modifiable Data Area size can be set with the mda parameter.  Both must
+be specified as a number of kilobytes.  Together, these options determine
+the start address and the length of the MDA.  The MDA resides at the end of
+user addressable memory.  The stack begins at the end of the MDA, and grows
+downward.  Static areas are pushed onto the stack when programs are loaded.
+The UVAS determines the address of the end of the MDA.  The MDA size then
+determines how far down the stack can grow.  The heap space starts at this
+address, as usual.  Space between the start of memory and the start of the
+heap is used to load code.  Segment zero is reserved for Operating System
+use, although currently it is not used much.  Code is loaded at the code
+base address, which usually is hex 00100000.  By setting the uvas
+parameter, you can set the address of the stack according to what you are
+used to on a real machine, if you want to compare results and register
+contents.  If you need more MDA, this can be used to set the proper amount
+of MDA.  If these settings are to high, you will get a message stating
+that there is not sufficient memory in your system to support this setting.
+If the settings are to low, minimum defaults are used.  This parameter also
+depends on the amount of memory allocated for the emulator with the memory
+option.
+
+MEMORY memory = <hex>
+
+This option specifies the amount of memory in bytes to be allocated for the
+emulator.  This is the amount of memory that is available to the single
+task within the emulator.  The emulator itself may obtain additional memory
+when it needs it, but this option simply specifies how much virtual memory
+the task can address.  If this setting is to high, you will get an error
+message stating that there is not sufficient memory in the host system, and
+the emulator is terminated.  If this setting is to low, the memory that
+can be assigned to the task option parameters is automatically reduced.
+
+DISK pda = <hex>, volume = <string>, type = <string>, path = <string>
+
+This option specifies what emulated physical disk drives are available to
+the system.  Each disk drive should have a unique Physical Device Address
+assigned to it.  You must also specify the volume name of the disk which
+is mounted on the drive.  The volume emulation type and the path on the
+native file system should also be specified.  Since the emulator is
+currently not able to load a configuration file, there is a pre-defined
+standard configuration which is used instead.  This standard configuration
+currently contains four disk devices, with the following Physical Device
+addresses: 2000, 2001, 2002 and 2003.  All other devices will be deleted
+from the configuration at IPL time, so you should only use these four
+Physical Device Addresses for now.  The volume emulation types have already
+been discussed.  Specify the type by entering the name of the emulation
+type as listed before.  Specify the path which contains all the data for
+the emulated volume.
+
+ECHO <string>
+
+This command can be used to make the hardware initialization routine print
+a message to the console.  This can be used to identify the initialization
+file that was selected to run the emulator, if you keep multiple
+initialization files around.
+
+PAUSE <string>
+
+This command is similar to the ECHO command.  The only difference is that
+the emulator will wait until you press return before it continues.  This
+can be used if you want to read and inspect the output of the hardware
+initialization routine.
+
+The system startup
+
+When the hardware initialization is complete, the emulator will report the
+amount of memory installed in the machine.  It will also report how the
+settings of the uvas and mda parameters affect the base addresses for the
+code and data portions of programs.  The system can then be IPL'ed by
+pressing enter.  The pre-defined configuration will then be activated, and
+the volume mounted on the device with PDA 2000 will become the IPL volume.
+The user can then logon, or enter the operators console.  There is
+currently no validation of the logon identification.  Instead of the
+password field, there is a field on the logon screen for the user to enter
+their name.
+
+When a user logs on, the command processor is initiated.  The user can do
+various things.  The usage constants can be set, in order to reduce typing
+in values that can be set to a default value.  The main function however is
+running programs of course.  When the PF1 key is pressed, the run screen
+appears.  The user can then enter the name of the program to be run.  If
+the file which is entered is not a program file, the systems procedure
+interpreter will be invoked.  This means that the procedure interpreter
+must be installed, otherwise procedures cannot be executed.  The user can
+also select to start debugging the program, by pressing PF1 instead of the
+enter key.  When the debugger is entered, a very limited number of
+debugging facilities are available.  Currently, the debugger does no effort
+to emulate the debugger on the real machine.  User interaction is based on
+simple console input and output.  When normal execution is resumed, the
+screen contents of the emulator are most likely totally garbled.  This can
+be corrected by refreshing the screen, using the control-W key.  This
+implementation of the debugger is not intended to be emulating the real
+debugger.  Its sole purpose is to support development of the emulator.
+This is needed sometimes to investigate how the emulator executes the
+programs.
+
+Debugger commands
+
+Below is a short overview of the debug commands and facilities that are
+currently available.  These can be used sometimes to figure out where and
+why the emulator fails.  This is of limited use to regular users, since
+these facilities are not sufficient to do extensive debugging.  Debugger
+commands are currently only one letter.  Some commands require parameters,
+and some do not.  A short description for each command follows.  Note that
+the debugger is case sensitive.  Commands that are not recognized are
+ignored.  This includes commands with illegal or incorrect parameters.  No
+error message is produced, so use caution when entering commands.  When a
+command is accepted, it is acknowledged, or the requested data is
+displayed.  When a hexadecimal address is required in the command, it must
+be entered as an eight character string of hexa-decimal digits, including
+leading zeroes.  When the debugger is entered, the contents of the
+registers are displayed.  The current instruction is displayed, and the
+previous instruction is displayed, as long as this information is
+available.  A small portion of the top of the stack is also displayed.
+From that point on, the commands below can be entered.
+
+b <break address in hex>
+Set breakpoint trap.  The address is required.  Only one breakpoint can be
+active at any time.  When a breakpoint trap is set, it replaces the
+previous breakpoint trap.  The breakpoint trap cannot be deactivated.  It
+can be replaced by another breakpoint trap though.  If you want to get rid
+of the effects of the breakpoint trap, you can set the breakpoint trap at
+address 00000000.  It will still be active, but if your program branches to
+this address, you would probably have bigger problems.  When the processor
+reaches the address which has been set with the breakpoint trap, execution
+is halted and the debugger is re-entered.
+
+c
+Cancel.  This cancels the current program, and returns to the caller.
+
+d <address> <length>
+Display memory.  The address and length are required.  The address must be
+specified in hexa-decimal format.  The length in decimal.  This dumps the
+memory at the specified address to the screen. The length for the dump must
+also be specified.  Note that this address must be fullword aligned.  If an
+incorrect value is entered, it is rounded to the next lower fullword
+address.  Memory is displayed in hexa-decimal and in ASCII.  Non-printable
+characters are printed as dots.
+
+D
+DMS trap on/off.  This command toggles the DMS trap.  This causes the
+program to enter the debugger each time a DMS service is called.  This can
+be used for debugging problems which are related to DMS emulation.
+
+i <option>
+Instruction count.  This option dumps or resets the instruction count
+values.  If no option is specified, the current instruction count values
+are shown.  The only option available is the reset option, which is
+indicated by the letter r.  Thus the counts can be reset by entering "ir"
+as command.  Each time an instruction is executed while the debugger is in
+control, the counter for that instruction is incremented.  Thus,
+statistical information about the instruction mix can be gathered.  This
+can then be used to determine what instructions would benefit from
+optimizations.
+
+o <opcode>
+Set opcode trap.  The opcode is required.  It can be either a hex opcode,
+or an instruction mnemonic in uppercase.  Only one opcode trap can be active
+at any time.  When an opcode trap is set, it replaces the previous opcode
+trap.  The opcode trap cannot be deactivated.  It can be replaced by
+another opcode trap though.  If you want to get rid of the effect of the
+opcode trap, you can set the opcode trap for opcode 00.  It will still be
+active, but if your program attempts to execute this opcode, you would
+probably have bigger problems.  When the processor reaches an instruction
+with the specified opcode, execution is halted, and the debugger is
+re-entered.
+
+L
+Linklevel trap on/off.  This command toggles the link level trap.  This
+causes the program to enter the debugger each time a link or an unlink
+occurs.  This can be used to debug a program module that is linked
+dynamically.
+
+m <address> <length>
+Modification trap.  The address and length are required for setting this
+trap.  The address must be specified in hexa-decimal format.  The length in
+decimal.  Only one modification trap can be active at any time.  When a
+modification trap is set, it replaces the previous modification trap.  The
+modification trap cannot be deactivated.  It can be replaced by another
+modification trap though.  If you want to get rid of the effect of the
+modification trap, you can set the modification trap for address 00000000.
+When the modification trap is set, a copy of the contents of the memory
+area to be monitored is saved for comparison,  The maximum length of the
+memory to be monitored is currently 256 bytes.  After an instruction has
+been executed, the contents of the area to be monitored are compared to the
+saved value.  If there is a difference, the debugger is re-entered, and a
+new copy of the current contents is saved.  The value of the current
+modification trap and the contents of the memory area that is being
+monitored can be inspected by entering the command without any parameters.
+
+s <count>
+Single step.  The execution of the program is resumed, and the number of
+steps specified in the command is executed.  When these instructions are
+completed, the debugger is resumed.  The step count must be specified in
+decimal.  If no step count is given, only one instruction is executed.
+
+t
+Trace list.  This command causes the address of the last 1000 instructions
+that were executed to be listed, if the emulator was running in the debug
+mode.  The list is dumped to the file trace.lst in the root of the current
+drive on the native file system.
+
+T
+Trace instructions on/off.  When the program has been assembled with
+instruction debugging, the trace flag can be toggled with this command.
+If the trace flag is on, each instruction will report that it is being
+executed.  This is mainly for printing instructions to the screen up to
+the point that the emulator crashes.  This can then be used to determine
+where and why the emulator crashed.  Release versions usually have this
+feature nullified by the fact that the instructions do not generate the
+output at all.
+
+x
+Exit debugger.  Execution is resumed.  Traps will still be active.
+Execution will be slower than normal since traps are being monitored.
+
+Workstation emulation.
+
+The emulator assumes that the user is logged on to a mws-type workstation.
+Some of the features are supported, but not all of them.  This also depends
+on the way the screen handling is performed.  The current PC implementation
+supports direct access to the video memory.  This makes it possible to
+emulate most of the required functionality.  The emulator can also use ANSI
+control characters, but then performance is degraded.  Systems that do not
+support direct video control could still be supported though by using these
+ANSI control characters.  This is currently not an option that can be
+configured, rather it is a compile-time option.  If a Wang keyboard with 16
+PF-keys is used, there will be no problem finding the usual special keys.
+For other keyboards, the Wang specific keys can be selected by using the
+control and alt keys in combination with the proper PF-keys, as usual.  For
+instance Control-F8 is the HELP key, and Control-F6 is the PF16 key.  For
+systems that do not support the PC style function keys, the PF-keys can be
+selected by pressing the escape key followed by two digits.  Esc 0 0 is the
+ENTER key, Esc 9 9 is the HELP key.  Other keys are obtained by entering
+the corresponding two digit PF-key number after pressing the escape key.
+When the screen contents of the emulator become garbled for some reason,
+the screen contents can be refreshed by pressing the Control-W key
+combination.
+
+Hardware requirements.
+
+This program runs on my 8 Mhz development notebook system, so it does not
+need real fast hardware.  Of course, if you have a 500 Mhz machine, it will
+run a lot faster.  The PC version uses a DOS extender, so you will need at
+least a 386 system.  The memory requirements of the program can be
+configured.  If you have more than 4 megabytes of RAM, that would be nice,
+because you will be able to configure 3 megabytes of memory or more.
+Otherwise, the emulator must adapt the memory map.  If you configure 2.5
+megabytes or more, everything is normal.  If you configure between 1.5 and
+2.5 megabytes, the MDA will reside below the code.  If you configure less
+than 1.5 megabytes, the code must start at 0x00080000 and it must be
+relocated.  This is only possible if there is a linkage block in the object
+file.  The relocation has not been tested in a long time, so to avoid
+trouble, configure more than 1.5 megabytes of memory.  Don't even think
+about configuring less than one megabyte, since this has not been tested
+for at least five years.  It used to work, before I upgraded from one to
+four megabytes in my notebook.  But most systems have lots of memory now.
+The program needs memory for itself too, so I do not really know how much
+memory should be available in the hardware.  The PC hardware must have DPMI
+memory available.  A real Wang keyboard would be nice, but it is not
+required.
+
+Feedback.
+
+This is the end of this introduction.  Everything in this document and the
+program is subject to change without notice.  Feedback can be sent to my
+E-mail address, or, if you prefer, by regular mail.  Please mention which
+version you are using.  This documentation corresponds to version 1.23.01,
+released on July 2, 2002.  The version is reported in the IPL monitor,
+the IPL screen, and the Operator's console show versions screen.
+This release is intended for educational and personal use only.  No commercial
+use is permitted.  Resale or redistribution is strictly prohibited.  Be aware
+that I cannot be held responsible for any damage whatsoever that is the result
+of the use of this product, or failure to be able to use this product.  You
+can send comments to:
+
+Ernest R. Schreurs
+Kempenlandstraat 8
+5211 VN  Den Bosch
+The Netherlands
+E-mail: ernest@wxs.nl
+Homepage: http://home.planet.nl/~ernest

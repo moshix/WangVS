@@ -1,0 +1,311 @@
+Getting started with the Wang VS emulator.
+
+This is a short introduction to help you get started.  In order to
+make the most of the emulator, you are going to need stuff that you
+can run.  Of course, it is nice to roam around the command processor,
+and the operator's console, but after a few moments, you grow tired of
+that.  So you are going to have to get some programs and data.  These
+files need to be copied from a VS to your emulator environment.  There
+are several ways you can transfer files from the VS to a PC and other
+systems.  In these days of co-existance, every VS machine is bound to
+have one of these installed.  Check with your system administrator.
+The process of transferring files is relatively easy.  The result is
+usually a binary file, sometimes with some sort of special format.
+This depends on what software is being used.  The emulator supports
+various formats.  Since I have access to a machine with Lightspeed,
+that is the tool I use myself, but any other will do just as well.
+
+The emulator will need to load the software and data from a disk
+volume.  Volumes are emulated through directories in the emulator
+environment.  These directories contain sub-directories for emulating
+the libraries.  Each sub-directory then holds the files for that
+library.  The initialization file lets you configure the disk volumes
+you need.  All files on a given volume must use the same volume
+emulation type.  The type of emulation to use depends on how you
+transfer files from the VS to the emulator environment.  This would
+mean that you set the volume emulation type of the volume to the type
+suitable for the transfer tool that you use.  Since you probably can
+obtain software from the Internet and other sources too, you will also
+need to define a volume that suits the format of those files.
+
+The Wang VS operating system includes lots of utilities and tools.
+The utilities that are needed for every day use are installed on the
+system volume.  Tools like the program development tools and the file
+management utilities can all be found in the system library on the
+system volume.  The system volume is the volume used to IPL the
+machine.  Normally, a customer engineer will install these programs on
+your system.  If you have never installed the Operating System
+yourself, you might not know what to install, and where to install it.
+Most software does not require a special installation procedure.  You
+only have to make sure that all the components of the software are
+placed in the proper libraries.  Most system utilities are stored in
+the system library.  This is the library named @SYSTEM@.  You have to
+be aware though that some programs need additional files.  The program
+might need a sub-program, or a file that contains some data.  Also,
+some programs contain references to SSL modules.  For instance, the
+EDITOR runs the sub-program WE1EDIT.  It also uses the sub-program
+ACLDVR.  These sub-programs are also located in the system library.
+In order to present the proper screens for the compilers, the EDITOR
+uses form files.  These form files usually reside in the library
+@SYSFRM@.  However, they may also be stored in a different library.
+Compilers usually consist of several modules.  Some also come with a
+runtime library that is required for linking the object file.  For
+instance the COBOL compiler consists of the program files COBOL,
+WC1$COB, WC1PASS1 and WC1PASS2.  For compiling programs written for
+PACE, the pre-processor modules are also needed.  For COBOL 85, the
+runtime libary is required.  It also needs the form files, and they
+must be properly installed, or the compiler will crash.  For assembler
+programs, the macro library @MACLIB@ is needed.  Programs like MANAGER
+also depend on several sub-programs.  To run these utilities on the
+emulator, all required components must be installed in the proper
+libraries on the system volume.  On the current version of the
+emulator, this is the volume which is specified for the disk device
+with PDA 2000 in the initialization file.
+
+If you want to run procedures, the procedure interpreter must be
+installed in the emulator environment.  The procedure interpreter is
+the program @PROC@ in the system library.  If an attempt is made to
+run something that cannot be identified as a program file, the
+procedure interpreter is invoked.
+
+Most of these problems are easy to deal with.  If we consider that for
+todays standards, a few megabytes of storage is nothing, we could
+easily copy the entire system volume to the emulator environment.
+This way you can be sure that all the files you need are available.
+If you want to conserve disk space, then you have to be more selective
+when copying files.  The manuals from Wang can provide you with the
+information needed to figure out which files you need, and which files
+can be omitted.  Note that for most of the files which are located in
+these operating system libraries, the copyright lies with Wang
+Laboratories Inc., and thus you should check with them to see if this
+is allowed.
+
+On the VS, each file has a File Descriptor Record associated with it.
+This is stored in the Volume Table Of Contents.  Most emulated volumes
+do not contain a VTOC, so this FDR information must be stored
+somewhere else.  The type of volume emulation determines how and where
+this FDR information is stored.  Some transfer tools include the FDR
+information in some sort of header, which is stored in the binary
+file.  Some methods of file transfer do not preserve this FDR
+information.  In these cases, you will have to manually enter the
+contents of the FDR.  If the emulator needs it, a screen is presented
+asking you to enter the required information.  For most files, all the
+information that is needed can be found using the command processor.
+Logon to the system where you obtained the file from and go to the
+manage files and libraries screen.  You can then display the file
+attributes of the file.  For some files it is required that you enter
+the entire FDR in the emulator environment.  If this is the case, you
+should run the program MANAGER on the system where you obtained the
+file from, and display the FDR1 record for the file in hexa-decimal
+notation.  You can enter this in the screen that is presented by the
+emulator.  In order to do this, you can switch that screen to a
+hexa-decimal notation.  The emulator can store this FDR information in
+a file, and from then on use this file, so you only have to enter this
+information once.
+
+Now that you have a general idea of what to do, here is a step by step
+description that shows how to get your emulator environment set up.
+
+Step 1: Installing the program.
+
+Install the emulator program in a directory of your choice.  There is
+no special installation procedure required.  All you have to do is to
+copy the emulator program and the configuration and initialization
+file to the directory that you want.  To start the emulator, you have
+to make that directory the current directory.  At startup, the
+emulator reads the configuration and initialization files from the
+current directory.  You could also place the program in the directory
+that contains all your other command files.  You could then setup
+various emulator environments, by placing different versions of the
+configuration and initialization files in different directories, and
+depending on what version you would like to run, make that directory
+the current directory before starting the emulator.  For the PC, the
+emulator program is the file VS.EXE.  For the Atari ST, the emulator
+program is the file VS.PRG.  The configuration file is the file
+CONFIG, it does not have an extension.  The initialization file is the
+file WANGVS.INI.  The configuration and initialization files control
+the resources available to the emulator.
+
+The initialization file is processed when the emulator is started.
+This file is a simple text file, which can be edited with any editor.
+The most important settings in this file are the information about the
+emulated volumes, and the amount of memory to use.
+
+Step 2: Configuring the emulator - devices.
+
+The devices that must be emulated are defined in the configuration
+file.  Currently, the contents of the configuration file are ignored.
+Thus, there is no need to edit this config file.  There is a
+pre-defined configuration available.  Only the devices that are
+pre-defined can be used.
+
+Step 3: Configuring the emulator - disk volumes.
+
+The emulated disk volumes that should be available must be defined in
+the initialization file.  For each disk volume to be emulated, a DISK
+line must be entered in the initialization file.  The volume field
+specifies the name of the volume.  Any valid volume name can be
+entered here.  The pda field must be set to the pda of a device which
+is defined in the configuration.  Currently only the pre-defined
+devices can be used, thus the pda must be 2000, 2001, 2002, 2003, 2004,
+2005, 2006, 2007, 2008 or 2009.
+Since there is no IPL-selection screen, the volume that is defined for
+the device with the pda 2000 will become the system volume.  The type
+field must be set to the volume emulation type that corresponds to the
+way the files for that volume were transferred to the emulator
+environment.  If you use Lightspeed, with the lightspeed backup
+format, set this to LSBACKUP.  If you use VSPC928, or any of the other
+SBA tools that use the VSDMS format, set this to VSDMS.  If you
+transferred the file using binary mode with FTP, or some other tool
+that copies files in a block mode, set the type to NONE.  If you
+transfer text files in ASCII mode, or if you want to use text files
+that are stored locally on your emulator environment, set the type to
+RECORD.  Finally, the directory path for the volume must be specified.
+The value that must be entered for this field should be the path to
+the directory that holds all the sub-directories for the libraries on
+the volume.  You may include the name of the device or disk drive.  If
+the directory is not located in the current directory, the path must
+include the full path.
+
+Step 4: Configuring the emulator - memory.
+
+To configure the memory for the emulator, you will have to consider a
+couple of things.  Obviously, the amount of memory that the emulator
+can use is limited by the amount of memory in your system.  If your
+operating system provides virtual memory, you can configure more
+memory, sometimes at the expense of performance.  What you should also
+consider is that there are options to configure the addressing space
+of the emulator.  This sounds complicated, but it really isn't.
+
+The VS determines where to store certain types of information.
+Regular program code is loaded at address 00100000.  Everything below
+that address is reserved for operating system use.  Years ago, the
+program data used to be located at address 00200000 and up, with
+002FFFFF being the highest available address.  Thus, the stack started
+at 00300000, growing downwards.  The area between 00200000 and
+00300000 was called the segment 2 space.  Life was simple back then.
+Unfortunately, programs required more and more space.  The concept of
+segments was changed.  Now programs are still loaded at 00100000, but
+they are allowed to be bigger than 1 megabyte.  Also, programs can
+have more memory for variables and other data.  The "segment 2" was
+replaced by the "Modifiable Data Area", also known as "MDA".  This is
+the data that a user program may modify.  The lower portion is still
+the space used to allocate buffers and other stuff that needs heap
+space.  The top portion is still the stack, where the static sections
+are created for programs.  The static sections contain all program
+data.  For COBOL programs, this includes the working storage section.
+On a real VS, the size of the MDA is specified by the system
+administrator, either through GENEDIT, or by setting a value in the
+USERLIST with the SECURITY utility.  Depending on the size of the MDA,
+the starting and ending address of the MDA can be calculated.  To do
+this, we need a little more information.  If the size of the code can
+be larger than one megabyte, the address of the last byte of object
+code will be beyond 00200000, so the MDA cannot start at that fixed
+address anymore.  The system administrator will determine how large
+the space for object code needs to be.  The amount of data that
+programs need to have in memory should also be determined.  These two
+together are the address space that user programs have access to, and
+this is called the User Virtual Address Space, or UVAS.  This is also
+one of these settings that the system administrator needs to
+determine.
+
+So the equasion is simple.  You take the amount of UVAS, and add that
+to 00100000.  That is where your stack will start to grow downwards.
+Then subtract the MDA from this, and you know where the heap will
+start at.  The space between 00100000 and the start of the heap is
+available for object code.
+
+The memory setting depends on how much memory you have available.  If
+the emulator reports that it cannot allocate the requested amount of
+memory, you must reduce the value of the memory field in the MEMORY
+line of the initialization file, unless you can make more memory
+available, by increasing the virtual memory.  If you need to have more
+Modifiable Data Area available in the emulator, the value of the
+memory setting must often also be increased.  When changing the value
+of the memory setting, you should also consider whether it is
+necessary to adjust the value of the mda setting and the uvas setting
+in the TASK line of the initialization file.  In fact, you first
+figure out how much UVAS and MDA you want, and then calculate how much
+memory is needed.  Of course the emulator could figure this out
+itself, but for an environment where there is very little memory
+available, the emulator can still be made to run by setting the proper
+memory configuration.  If the emulator must be configured to use less
+than 2.5 meg of memory, refer to the documentation.  If you want the
+address space to be exactly like on a real VS that you normally work
+on, you should set the uvas and mda settings to the same values as
+your real VS.  Ask your system administrator about these values.  The
+amount of memory to allocate for the emulator would then be the amount
+of UVAS plus one megabyte.
+
+Step 5: Copying software.
+
+As discussed before, this step depends on the transfer tool that you
+use.  Transfer the files you need to the emulator environment.  You
+should place the files in the directory that you specified in the
+initialization file for the volume.  If it does not yet exist, you
+should create it.  You will have to create sub-directories for the
+libraries, and place the files in those sub-directories.  Use the same
+transfer tool for all the files that you place on a given emulated
+volume.  If your transfer tool does not include the FDR information,
+make a note of the required information as mentioned before, or look
+up the information as needed.  Screen prints can be of some help
+here.  Please note that some licenses do not permit you to copy your
+software.  Consult your license and your vendor for more information.
+
+Step 6: Starting the emulator.
+
+Once the emulator is properly configured, we can run it.  Simply start
+the program, and it will present the license agreement.  If you agree
+to the terms, enter yes, and the emulator will continue.  If not,
+entering no will terminate the program.  The emulator will read the
+configuration and initialization files.  The information will be
+processed, and results are reported to the screen.  Verify that the
+settings are accepted, and correct any mistakes if required.  The
+emulator will report the configuration of the addressing space.  You
+should also verify that this is what you wanted, and press enter to
+ackowledge it.  If the emulator reports that it cannot allocate the
+requested amount of memory, you will have to change the memory
+settings as discussed.  If the memory can be allocated, the emulator
+is IPL'ed and a logon screen will then be presented.
+
+Step 7: Logging on.
+
+Currently, there is no userlist for the emulator.  However, a logon
+screen is still presented. albeit a slightly modified version.  The
+Logon-id should be entered.  Logon-ID's of more than 3 characters are
+not yet supported.  There is no password field on the logon screen.
+Instead, the user can enter her or his name.  There is no validation
+of any of this.  If you logon, the command processor screen is
+displayed.  There is no userlist, so there cannot be a logon program
+or procedure at the moment.  From the logon screen, you can also go to
+the operator's console.
+
+Step 8: Running programs.
+
+From this point on, everything should be familiar.  You can run
+programs, and do things in the command processor and operator's
+console.  The keyboard usage depends on what environment you are
+running the emulator on.  If you are running on a PC, the PF-keys can
+be used.  For PF-keys 13 through 16, you must press the alt-key
+together with F3 through F6.  For PF-keys 29 through 32 you must press
+the control-key together with F3 through F6.  If you need to press the
+help key, press the alt-key together with F8.  If your system does not
+support function keys, you can press the escape key, and then the
+two-digit number of the function key you need.  For function keys
+lower than 10, you must enter a leading zero too, so PF1 can be
+activated by entering escape 01.  The help key can be activated by
+pressing escape 99.  Note that currently the help key does not
+immediately interrupt the processing.  The help key will be acted upon
+as soon as input is checked for.
+
+We have come to the end of this introduction.  if you need more
+information, you can read the documentation.  If that does not help
+you, you can send me E-mail, or if that is not possible, contact me by
+regular mail.
+
+Internet Email: ernest@wxs.nl
+Homepage      : http://home.planet.nl/~ernest
+Address       : Ernest R. Schreurs
+                Kempenlandstraat 8
+                5211 VN  Den Bosch
+                The Netherlands
